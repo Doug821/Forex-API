@@ -17,6 +17,12 @@ class ExchangeController {
       return response.status(400).json({ error: 'Missing required data' });
     }
 
+    if (send < 0 || receive < 0) {
+      return response
+        .status(400)
+        .json({ error: 'The ammount should be a positive number' });
+    }
+
     const exchange = await ExchangesRepository.create({
       send,
       receive,
@@ -28,12 +34,6 @@ class ExchangeController {
 
   async delete(request: Request, response: Response) {
     const { id } = request.params;
-
-    const exchange = await ExchangesRepository.findById(id);
-
-    if (!exchange) {
-      return response.status(404).json({ error: 'Exchange not found' });
-    }
 
     await ExchangesRepository.delete(id);
     response.sendStatus(204);

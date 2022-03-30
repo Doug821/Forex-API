@@ -15,6 +15,13 @@ let exchanges = [
     operation: 'GBP-USD',
     date: new Date(),
   },
+  {
+    id: '1',
+    send: 1000,
+    receive: 1000,
+    operation: 'GBP-USD',
+    date: new Date(),
+  },
 ];
 
 interface Exchange {

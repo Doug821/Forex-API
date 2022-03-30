@@ -15,3 +15,5 @@ app.use(routes);
 app.listen(port, () => {
   console.log(`🔥 Server started at https://localhost:${port}`);
 });
+
+export default app;
