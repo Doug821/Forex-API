@@ -4,11 +4,31 @@ import { v4 } from 'uuid';
 import request from 'supertest';
 import app from '../../src/index';
 
+interface Exchange {
+  id: string;
+  send: number;
+  receive: number;
+  operation: string;
+  date: Date;
+}
+
 describe('Exchange controller tests', () => {
   it('should return a status code 200 when listing all exchanges', async () => {
     const response = await request(app).get('/exchanges');
 
     expect(response.statusCode).toBe(200);
+  });
+
+  it('should be sucessfull when listing all exchanges if the data type of the properties is correct', async () => {
+    const response = await request(app).get('/exchanges');
+
+    const typeData = (data: Exchange) => typeof data.id === 'string'
+      && typeof data.send === 'number'
+      && typeof data.receive === 'number'
+      && typeof data.operation === 'string'
+      && typeof data.date === 'string';
+
+    expect(typeData(response.body[0])).toBe(true);
   });
 
   it('should be able to create a new exchange', async () => {
