@@ -25,6 +25,23 @@ To install all this project dependencies
 npm install | yarn install
 ```
 
+Create and config a `.env` file with the following options
+
+```dosini
+  PORT="The port that your project must run"
+  APIKEY="The API key for the currency converter API"
+```
+
+**Ps**: You can get your APIKEY here - [Currency API](https://www.currencyconverterapi.com/)
+
+```dosini
+  USERNAME="your postgresql username"
+  PASSWORD="your postgresql password"
+
+  REDIS_HOST="the host that redis database is running on"
+  REDIS_PORT="the port that redis database is running on"
+```
+
 Run this project using the following command
 
 ```bash
