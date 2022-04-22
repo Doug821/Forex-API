@@ -18,5 +18,9 @@ module.exports = {
   rules: {
     'class-methods-use-this': 'off',
     'consistent-return': 'off',
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off',
+    'import/prefer-default-export': 'off',
+    'no-shadow': 'off',
   },
 };
