@@ -1,22 +1,22 @@
 /* eslint-disable no-unused-vars */
 import { createServer } from 'http';
-import { Server } from 'socket.io';
-import Client from 'socket.io-client';
+import { Server, Socket } from 'socket.io';
+import Client, { Socket as SocketClient } from 'socket.io-client';
 import ExchangesRepository from '../../src/app/repositories/ExchangesRepository';
 
 const port = '3000';
 
 describe('Websockets tests', () => {
-  let io: any;
-  let serverSocket: any;
-  let clientSocket: any;
+  let io: Server;
+  let serverSocket: Socket;
+  let clientSocket: SocketClient;
 
   beforeAll((done) => {
     const httpServer = createServer();
     io = new Server(httpServer);
     httpServer.listen(() => {
       clientSocket = Client(`http://localhost:${port}`);
-      io.on('connection', (socket: any) => {
+      io.on('connection', (socket: Socket) => {
         serverSocket = socket;
       });
       clientSocket.on('connect', done);

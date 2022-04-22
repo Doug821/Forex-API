@@ -22,14 +22,14 @@ class ExchangeController {
         .json({ error: 'The ammount should be a positive number' });
     }
 
-    const receive: any = await ExchangesRepository.currencyConverter(
+    const receive = await ExchangesRepository.currencyConverter(
       amount,
       operation,
     );
 
     const exchange = {
       send: amount,
-      receive: receive.exchange,
+      receive: receive?.exchange,
       operation,
     };
 

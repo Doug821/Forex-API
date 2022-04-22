@@ -38,14 +38,14 @@ export default function Socket(httpServer: any) {
 
     // Create and return a new exchange
     socket.on('exchange', async ({ amount, operation }) => {
-      const receive: any = await ExchangesRepository.currencyConverter(
+      const receive = await ExchangesRepository.currencyConverter(
         amount,
         operation,
       );
 
       const exchange = {
         send: amount,
-        receive: receive.exchange,
+        receive: receive?.exchange,
         operation,
       };
 
@@ -56,13 +56,12 @@ export default function Socket(httpServer: any) {
 
     // Delete an exchange
     socket.on('delete', async (id: string) => {
-      const receive: any = await ExchangesRepository.delete(id);
-      console.log(receive);
+      await ExchangesRepository.delete(id);
     });
 
     // Get currency history
     socket.on('history', async ({ operation, date }) => {
-      const history: any = await ExchangesRepository.currencyHistory(
+      const history = await ExchangesRepository.currencyHistory(
         operation,
         date,
       );
