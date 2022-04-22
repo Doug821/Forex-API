@@ -1,5 +1,3 @@
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-unresolved */
 import { Router } from 'express';
 import ExchangeController from './app/controllers/ExchangeController';
 

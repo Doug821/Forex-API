@@ -1,6 +1,5 @@
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-unresolved */
 import { Request, Response } from 'express';
+import Queue from '../lib/Queue';
 import ExchangesRepository from '../repositories/ExchangesRepository';
 
 class ExchangeController {
@@ -11,31 +10,39 @@ class ExchangeController {
   }
 
   async store(request: Request, response: Response) {
-    const { send, receive, operation } = request.body;
+    const { amount, operation } = request.body;
 
-    if (!send || !receive || !operation) {
+    if (!amount || !operation) {
       return response.status(400).json({ error: 'Missing required data' });
     }
 
-    if (send < 0 || receive < 0) {
+    if (amount < 0) {
       return response
         .status(400)
         .json({ error: 'The ammount should be a positive number' });
     }
 
-    const exchange = await ExchangesRepository.create({
-      send,
-      receive,
+    const receive: any = await ExchangesRepository.currencyConverter(
+      amount,
       operation,
-    });
+    );
 
-    response.json(exchange);
+    const exchange = {
+      send: amount,
+      receive: receive.exchange,
+      operation,
+    };
+
+    Queue.add('ExchangeCreation', exchange);
+
+    response.status(201).json(exchange);
   }
 
   async delete(request: Request, response: Response) {
     const { id } = request.params;
 
     await ExchangesRepository.delete(id);
+
     response.sendStatus(204);
   }
 }

@@ -1,58 +1,24 @@
-import { v4 } from 'uuid';
+import moment from 'moment';
+import dotenv from 'dotenv';
+import api from '../../services/api';
 
-let exchanges = [
-  {
-    id: v4(),
-    send: 1000,
-    receive: 1000,
-    operation: 'GBP-USD',
-    date: new Date(),
-  },
-  {
-    id: v4(),
-    send: 1000,
-    receive: 1000,
-    operation: 'GBP-USD',
-    date: new Date(),
-  },
-  {
-    id: '1',
-    send: 1000,
-    receive: 1000,
-    operation: 'GBP-USD',
-    date: new Date(),
-  },
-];
+dotenv.config();
+const key = process.env.APIKEY;
 
-interface Exchange {
-  id: string;
-  send: number;
-  receive: number;
-  operation: string;
-  date: Date;
-}
+const db = require('../../database');
 
 class ExchangesRepository {
-  findAll() {
-    return new Promise((resolve) => {
-      resolve(exchanges);
-    });
+  async findAll() {
+    const rows = await db.query('SELECT * FROM exchanges');
+    return rows;
   }
 
-  findById(id: string) {
-    return new Promise((resolve) => {
-      resolve(exchanges.find((exchange: Exchange) => exchange.id === id));
-    });
+  async delete(id: string) {
+    const exchange: any = db.query('DELETE FROM exchanges WHERE id = $1', [id]);
+    return exchange;
   }
 
-  delete(id: string) {
-    return new Promise<void>((resolve) => {
-      exchanges = exchanges.filter((exchange: Exchange) => exchange.id !== id);
-      resolve();
-    });
-  }
-
-  create({
+  async create({
     send,
     receive,
     operation,
@@ -61,17 +27,61 @@ class ExchangesRepository {
     receive: number;
     operation: string;
   }) {
-    return new Promise((resolve) => {
-      const newExchange = {
-        id: v4(),
-        send,
-        receive,
-        operation,
-        date: new Date(),
-      };
+    const [row] = await db.query(
+      `
+        INSERT INTO exchanges(send, receive, operation)
+        VALUES($1, $2, $3)
+        RETURNING *
+      `,
+      [send, receive, operation],
+    );
+    return row;
+  }
 
-      exchanges.push(newExchange);
-      resolve(newExchange);
+  currencyConverter(amount: number, operation: string) {
+    return new Promise((resolve) => {
+      if (amount && operation) {
+        api
+          .get(`convert?q=${operation}&compact=ultra&apiKey=${key}`)
+          .then((response) => {
+            const exchangeType = Object.values(response.data)[0];
+            const exchange = amount * Number(exchangeType);
+            resolve({ baseRate: Number(exchangeType), exchange });
+          });
+      }
+    });
+  }
+
+  currencyHistory(operation: string, date: string) {
+    return new Promise((resolve) => {
+      if (!operation || !date) {
+        resolve({ error: 'Invalid credentials' });
+      } else {
+        const [year, month, day] = date.split('-');
+        const currentlyDate = new Date(
+          Number(year),
+          Number(month) - 1,
+          Number(day),
+        );
+        const dayWrapper = moment(currentlyDate).subtract(7, 'days').toDate();
+        const startDateISOS = new Date(dayWrapper).toISOString();
+        const startDate = startDateISOS.substring(0, 10);
+
+        let exchangeType;
+        if (operation === 'GBP to USD') {
+          exchangeType = 'GBP_USD';
+        } else {
+          exchangeType = 'USD_GBP';
+        }
+
+        api
+          .get(
+            `convert?q=${exchangeType}&compact=ultra&date=${startDate}&endDate=${date}&apiKey=${key}`,
+          )
+          .then((response) => {
+            resolve(response.data);
+          });
+      }
     });
   }
 }
